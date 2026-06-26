@@ -130,7 +130,7 @@ export const translations = {
       country: "Côte d'Ivoire",
       newsletter: 'Restez informé',
       newsletterText: 'Inscrivez-vous à notre newsletter pour découvrir nos nouvelles créations',
-      emailPlaceholder: 'Votre email',
+      emailPlaceholder: 'ex: zakary@email.com',
       subscribe: "S'inscrire",
       subscribed: 'Merci de votre inscription',
       legal: 'Mentions légales',

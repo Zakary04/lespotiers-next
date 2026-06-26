@@ -29,7 +29,7 @@ export default function NewsletterForm() {
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
-        className="bg-white text-gray-900 placeholder:text-gray-500"
+        className="bg-background border-border"
       />
       <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:bg-primary/90">
         {isSubmitting ? '...' : t.footer.subscribe}

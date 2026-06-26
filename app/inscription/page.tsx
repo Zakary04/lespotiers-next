@@ -106,7 +106,7 @@ export default function InscriptionPage() {
                     onChange={e => setFirstName(e.target.value)}
                     required
                     autoComplete="given-name"
-                    placeholder="Kouadio"
+                    placeholder="ex: Zakary"
                     className="bg-background border-border focus-visible:ring-primary"
                   />
                 </div>
@@ -121,7 +121,7 @@ export default function InscriptionPage() {
                     onChange={e => setLastName(e.target.value)}
                     required
                     autoComplete="family-name"
-                    placeholder="Koné"
+                    placeholder="ex: Bamba"
                     className="bg-background border-border focus-visible:ring-primary"
                   />
                 </div>
@@ -138,7 +138,7 @@ export default function InscriptionPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  placeholder="vous@exemple.com"
+                  placeholder="ex: zakary@email.com"
                   className="bg-background border-border focus-visible:ring-primary"
                 />
               </div>

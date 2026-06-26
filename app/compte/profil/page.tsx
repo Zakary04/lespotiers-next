@@ -80,7 +80,7 @@ export default function ProfilPage() {
                     type="text"
                     value={firstName}
                     onChange={e => setFirstName(e.target.value)}
-                    placeholder="Votre prénom"
+                    placeholder="ex: Zakary"
                     className="bg-background border-border focus-visible:ring-primary"
                   />
                 </div>
@@ -93,7 +93,7 @@ export default function ProfilPage() {
                     type="text"
                     value={lastName}
                     onChange={e => setLastName(e.target.value)}
-                    placeholder="Votre nom"
+                    placeholder="ex: Bamba"
                     className="bg-background border-border focus-visible:ring-primary"
                   />
                 </div>

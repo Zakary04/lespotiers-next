@@ -74,7 +74,7 @@ function ConnexionForm() {
             onChange={e => setEmail(e.target.value)}
             required
             autoComplete="email"
-            placeholder="vous@exemple.com"
+            placeholder="ex: zakary@email.com"
             className="bg-background border-border focus-visible:ring-primary"
           />
         </div>

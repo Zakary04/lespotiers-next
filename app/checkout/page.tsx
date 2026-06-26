@@ -123,19 +123,22 @@ export default function CheckoutPage() {
   useEffect(() => {
     const saved = localStorage.getItem(ADDRESS_KEY)
     if (saved) {
-      try { setAddress(JSON.parse(saved)) } catch { /* ignore */ }
-    } else if (profile) {
+      try {
+        const parsed = JSON.parse(saved)
+        setAddress({
+          ...parsed,
+          email: user?.email || parsed.email || '',
+        })
+      } catch { /* ignore */ }
+    } else {
       setAddress(prev => ({
         ...prev,
-        firstName: profile.first_name ?? '',
-        lastName:  profile.last_name  ?? '',
+        firstName: profile?.first_name ?? prev.firstName,
+        lastName:  profile?.last_name  ?? prev.lastName,
+        email: user?.email || prev.email,
       }))
     }
-  }, [profile])
-
-  useEffect(() => {
-    if (user?.email) setAddress(prev => ({ ...prev, email: user.email! }))
-  }, [user])
+  }, [profile, user])
 
   useEffect(() => {
     if (!isLoadingCart && cartItems.length === 0 && step === 1) {
@@ -314,35 +317,35 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <Field label="Prénom *">
-                      <Input value={address.firstName} onChange={set('firstName')} placeholder="Marie" className="bg-background border-border" />
+                      <Input value={address.firstName} onChange={set('firstName')} placeholder="ex: Zakary" className="bg-background border-border" />
                     </Field>
                     <Field label="Nom *">
-                      <Input value={address.lastName} onChange={set('lastName')} placeholder="Dupont" className="bg-background border-border" />
+                      <Input value={address.lastName} onChange={set('lastName')} placeholder="ex: Bamba" className="bg-background border-border" />
                     </Field>
                   </div>
                   <Field label="Adresse e-mail *">
                     <Input type="email" value={address.email} onChange={set('email')}
-                      placeholder="marie@exemple.fr" readOnly={!!user}
-                      className={`bg-background border-border ${user ? 'opacity-60 cursor-default' : ''}`} />
+                      placeholder="ex: zakary@email.com" readOnly={!!user?.email}
+                      className={`bg-background border-border ${user?.email ? 'opacity-60 cursor-default' : ''}`} />
                   </Field>
                   <Field label="Adresse complète *">
-                    <Input value={address.address} onChange={set('address')} placeholder="12 rue de la Paix" className="bg-background border-border" />
+                    <Input value={address.address} onChange={set('address')} placeholder="ex: 12 rue de la Paix" className="bg-background border-border" />
                   </Field>
                   <div className="grid sm:grid-cols-3 gap-4">
                     <Field label="Code postal *">
-                      <Input value={address.postalCode} onChange={set('postalCode')} placeholder="75001" className="bg-background border-border" />
+                      <Input value={address.postalCode} onChange={set('postalCode')} placeholder="ex: 01 BP 1234" className="bg-background border-border" />
                     </Field>
                     <div className="sm:col-span-2">
                       <Field label="Ville *">
-                        <Input value={address.city} onChange={set('city')} placeholder="Paris" className="bg-background border-border" />
+                        <Input value={address.city} onChange={set('city')} placeholder="ex: Abidjan" className="bg-background border-border" />
                       </Field>
                     </div>
                   </div>
                   <Field label="Pays *">
-                    <Input value={address.country} onChange={set('country')} className="bg-background border-border" />
+                    <Input value={address.country} onChange={set('country')} placeholder="ex: Côte d'Ivoire" className="bg-background border-border" />
                   </Field>
                   <Field label="Téléphone *">
-                    <Input type="tel" value={address.phone} onChange={set('phone')} placeholder="+33 6 12 34 56 78" className="bg-background border-border" />
+                    <Input type="tel" value={address.phone} onChange={set('phone')} placeholder="ex: +225 07 00 00 00" className="bg-background border-border" />
                   </Field>
                   <label className="flex items-center gap-2.5 cursor-pointer select-none pt-1">
                     <input type="checkbox" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)}

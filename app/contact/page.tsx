@@ -51,15 +51,15 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold mb-2 text-foreground">{t.contact.name}</label>
-                  <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} required className="bg-background text-foreground border-border placeholder:text-muted-foreground focus-visible:ring-primary" />
+                  <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="ex: Zakary Bamba" className="bg-background border-border focus-visible:ring-primary" />
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-semibold mb-2 text-foreground">{t.contact.email}</label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required className="bg-background text-foreground border-border placeholder:text-muted-foreground focus-visible:ring-primary" />
+                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="ex: zakary@email.com" className="bg-background border-border focus-visible:ring-primary" />
                 </div>
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold mb-2 text-foreground">{t.contact.message}</label>
-                  <Textarea id="message" name="message" value={formData.message} onChange={handleChange} rows={6} required className="bg-background text-foreground border-border placeholder:text-muted-foreground focus-visible:ring-primary" />
+                  <Textarea id="message" name="message" value={formData.message} onChange={handleChange} rows={6} required placeholder="ex: Je souhaite en savoir plus sur vos créations…" className="bg-background border-border focus-visible:ring-primary" />
                 </div>
                 <Button type="submit" size="lg" disabled={isSubmitting} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 border-none">
                   {isSubmitting ? t.contact.sending : t.contact.send}

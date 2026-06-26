@@ -74,6 +74,18 @@ html {
     font-weight: 400; /* Regular */
     text-wrap: balance;
   }
+
+  /* Placeholder: gray at 45% opacity, disappears on focus */
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 0.45;
+    transition: opacity 0.15s ease;
+  }
+  input:focus::placeholder,
+  textarea:focus::placeholder {
+    opacity: 0;
+  }
 }
 
 @layer components {
