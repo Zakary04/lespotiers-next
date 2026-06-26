@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Users } from 'lucide-react'
+import { Download, Users } from 'lucide-react'
+import * as XLSX from 'xlsx'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
@@ -23,8 +25,9 @@ const ROLE_STYLE: Record<string, string> = {
 }
 
 export default function AdminUtilisateursPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([])
-  const [loading, setLoading] = useState(true)
+  const [profiles,  setProfiles]  = useState<Profile[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [exporting, setExporting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -34,6 +37,36 @@ export default function AdminUtilisateursPage() {
       .order('created_at', { ascending: false })
       .then(({ data }) => { setProfiles(data ?? []); setLoading(false) })
   }, [])
+
+  const exportUtilisateurs = async () => {
+    setExporting(true)
+    try {
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('customer_email, total_amount')
+      const orderMap = new Map<string, { count: number; total: number }>()
+      for (const o of orders ?? []) {
+        const ex = orderMap.get(o.customer_email) ?? { count: 0, total: 0 }
+        orderMap.set(o.customer_email, { count: ex.count + 1, total: ex.total + o.total_amount })
+      }
+      const exportRows = profiles.map(p => {
+        const s = orderMap.get(p.email ?? '') ?? { count: 0, total: 0 }
+        return {
+          'Nom complet':        [p.first_name, p.last_name].filter(Boolean).join(' ') || '—',
+          'Email':              p.email ?? '—',
+          'Rôle':               p.role,
+          "Date d'inscription": fmtDate(p.created_at),
+          'Commandes':          s.count,
+          'Total dépensé (€)':  s.total.toFixed(2),
+        }
+      })
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportRows), 'Utilisateurs')
+      XLSX.writeFile(wb, `utilisateurs-${new Date().toISOString().slice(0, 10)}.xlsx`)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const changeRole = async (id: string, role: string) => {
     const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
@@ -50,9 +83,23 @@ export default function AdminUtilisateursPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Cinzel, serif' }}>Utilisateurs</h1>
-        <p className="text-sm text-muted-foreground mt-1">{profiles.length} compte{profiles.length !== 1 ? 's' : ''} enregistré{profiles.length !== 1 ? 's' : ''}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Cinzel, serif' }}>Utilisateurs</h1>
+          <p className="text-sm text-muted-foreground mt-1">{profiles.length} compte{profiles.length !== 1 ? 's' : ''} enregistré{profiles.length !== 1 ? 's' : ''}</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-border gap-1.5 shrink-0"
+          onClick={exportUtilisateurs}
+          disabled={exporting || profiles.length === 0}
+        >
+          {exporting
+            ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            : <Download className="h-3.5 w-3.5" />}
+          Exporter Excel
+        </Button>
       </div>
 
       {loading ? (

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Pencil, Hammer } from 'lucide-react'
+import { Download, Plus, Pencil, Hammer } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
@@ -18,8 +19,9 @@ interface Row {
 }
 
 export default function AdminArtisansPage() {
-  const [rows, setRows] = useState<Row[]>([])
-  const [loading, setLoading] = useState(true)
+  const [rows,      setRows]      = useState<Row[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [exporting, setExporting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -30,6 +32,43 @@ export default function AdminArtisansPage() {
       .then(({ data }) => { setRows(data ?? []); setLoading(false) })
   }, [])
 
+  const exportArtisans = async () => {
+    setExporting(true)
+    try {
+      const [{ data: products }, { data: orders }] = await Promise.all([
+        supabase.from('products').select('artisan_name').eq('is_archived', false),
+        supabase.from('orders').select('items'),
+      ])
+      const productCount = new Map<string, number>()
+      for (const p of products ?? []) {
+        const n = p.artisan_name ?? ''
+        productCount.set(n, (productCount.get(n) ?? 0) + 1)
+      }
+      const artisanRevenue = new Map<string, number>()
+      for (const o of orders ?? []) {
+        for (const item of (o.items ?? []) as { artisan_name?: string; subtotal?: number; unit_price?: number; quantity?: number }[]) {
+          const n = item.artisan_name || ''
+          const amt = item.subtotal || (item.unit_price ?? 0) * (item.quantity ?? 0) || 0
+          artisanRevenue.set(n, (artisanRevenue.get(n) ?? 0) + amt)
+        }
+      }
+      const exportRows = rows.map(r => ({
+        'Nom':                  r.name,
+        'Titre':                r.title,
+        'Spécialités':          (r.specialties ?? []).join(', '),
+        'Localisation':         r.location ?? '',
+        "Années d'expérience":  r.years_experience ?? '',
+        'Produits actifs':      productCount.get(r.name) ?? 0,
+        'CA total généré (€)':  (artisanRevenue.get(r.name) ?? 0).toFixed(2),
+      }))
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportRows), 'Artisans')
+      XLSX.writeFile(wb, `artisans-${new Date().toISOString().slice(0, 10)}.xlsx`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -37,12 +76,26 @@ export default function AdminArtisansPage() {
           <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Cinzel, serif' }}>Artisans</h1>
           <p className="text-sm text-muted-foreground mt-1">{rows.length} artisan{rows.length !== 1 ? 's' : ''} enregistré{rows.length !== 1 ? 's' : ''}</p>
         </div>
-        <Link href="/admin/artisans/nouveau">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 border-none gap-1.5">
-            <Plus className="h-4 w-4" />
-            Nouvel artisan
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-border gap-1.5"
+            onClick={exportArtisans}
+            disabled={exporting || rows.length === 0}
+          >
+            {exporting
+              ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              : <Download className="h-3.5 w-3.5" />}
+            Exporter Excel
           </Button>
-        </Link>
+          <Link href="/admin/artisans/nouveau">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 border-none gap-1.5">
+              <Plus className="h-4 w-4" />
+              Nouvel artisan
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {loading ? (

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, Pencil, Archive, ArchiveRestore, Package } from 'lucide-react'
+import { Download, Plus, Search, Pencil, Archive, ArchiveRestore, Package } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -18,6 +19,7 @@ interface Row {
   is_new: boolean
   is_archived: boolean
   images: string[]
+  created_at: string
 }
 
 const CAT: Record<string, string> = {
@@ -35,7 +37,7 @@ export default function AdminProduitsPage() {
     setLoading(true)
     const { data } = await supabase
       .from('products')
-      .select('id, name, artisan_name, category, price, stock, is_new, is_archived, images')
+      .select('id, name, artisan_name, category, price, stock, is_new, is_archived, images, created_at')
       .order('name')
     setRows(data ?? [])
     setLoading(false)
@@ -47,6 +49,22 @@ export default function AdminProduitsPage() {
     await supabase.from('products').update({ is_archived: !current }).eq('id', id)
     toast.success(current ? 'Produit restauré' : 'Produit archivé')
     setRows(prev => prev.map(r => r.id === id ? { ...r, is_archived: !current } : r))
+  }
+
+  const exportProduits = () => {
+    const exportRows = rows.map(r => ({
+      'Nom du produit':  r.name,
+      'Prix (€)':        r.price,
+      'Stock':           r.stock ?? 0,
+      'Catégorie':       CAT[r.category] ?? r.category,
+      'Artisan':         r.artisan_name,
+      'Nouveau':         r.is_new ? 'Oui' : 'Non',
+      'Statut':          r.is_archived ? 'Archivé' : 'Actif',
+      "Date d'ajout":    r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : '',
+    }))
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exportRows), 'Produits')
+    XLSX.writeFile(wb, `produits-${new Date().toISOString().slice(0, 10)}.xlsx`)
   }
 
   const visible = rows.filter(r => {
@@ -88,6 +106,16 @@ export default function AdminProduitsPage() {
         >
           <Archive className="h-3.5 w-3.5" />
           {showArchived ? 'Masquer archivés' : 'Voir archivés'}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-border gap-1.5"
+          onClick={exportProduits}
+          disabled={rows.length === 0}
+        >
+          <Download className="h-3.5 w-3.5" />
+          Exporter Excel
         </Button>
       </div>
 

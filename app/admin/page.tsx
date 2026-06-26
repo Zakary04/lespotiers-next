@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { LayoutDashboard, Package, Hammer, ShoppingBag, Users, TrendingUp, Plus } from 'lucide-react'
+import { Download, LayoutDashboard, Package, Hammer, ShoppingBag, Users, TrendingUp, Plus } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
@@ -33,9 +34,49 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [orders, setOrders] = useState<RecentOrder[]>([])
+  const [stats,     setStats]     = useState<Stats | null>(null)
+  const [orders,    setOrders]    = useState<RecentOrder[]>([])
+  const [exporting, setExporting] = useState(false)
   const supabase = createClient()
+
+  const exportDashboard = async () => {
+    setExporting(true)
+    try {
+      const now = new Date()
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+      const twelveAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+      const { data: allOrders } = await supabase
+        .from('orders')
+        .select('total_amount, created_at')
+        .gte('created_at', twelveAgo.toISOString())
+        .neq('status', 'cancelled')
+      const monthlyMap = new Map<string, number>()
+      for (const o of allOrders ?? []) {
+        const d = new Date(o.created_at)
+        const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
+        monthlyMap.set(key, (monthlyMap.get(key) ?? 0) + o.total_amount)
+      }
+      const kpiRows = [
+        { 'Indicateur': 'CA mois en cours',  'Valeur': stats ? `${stats.revenue.toFixed(2)} €` : '—' },
+        { 'Indicateur': 'Commandes ce mois', 'Valeur': stats?.orders ?? 0 },
+        { 'Indicateur': 'Produits actifs',   'Valeur': stats?.products ?? 0 },
+        { 'Indicateur': 'Clients inscrits',  'Valeur': stats?.customers ?? 0 },
+        { 'Indicateur': 'Artisans',          'Valeur': stats?.artisans ?? 0 },
+      ]
+      const monthlyRows = Array.from({ length: 12 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
+        const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
+        return { 'Mois': `${MONTHS[d.getMonth()]} ${d.getFullYear()}`, 'CA (€)': monthlyMap.get(key) ?? 0 }
+      })
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kpiRows), 'KPIs')
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(monthlyRows), 'CA mensuel')
+      XLSX.writeFile(wb, `rapport-global-${now.toISOString().slice(0, 10)}.xlsx`)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -89,6 +130,18 @@ export default function AdminDashboard() {
           <p className="text-sm text-muted-foreground mt-1">Vue d'ensemble de votre boutique</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-border gap-1.5"
+            onClick={exportDashboard}
+            disabled={exporting}
+          >
+            {exporting
+              ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              : <Download className="h-3.5 w-3.5" />}
+            Exporter Excel
+          </Button>
           <Link href="/admin/produits/nouveau">
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 border-none gap-1.5">
               <Plus className="h-3.5 w-3.5" />
