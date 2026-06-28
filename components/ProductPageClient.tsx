@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingCart, Plus, Minus, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import type { Product } from '@/data/products';
@@ -46,12 +46,27 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="aspect-square rounded-2xl overflow-hidden shadow-lg border border-border mb-3 bg-muted">
+            <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg border border-border mb-3 bg-muted">
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className={`w-full h-full object-cover transition-opacity duration-300 ${outOfStock ? 'grayscale' : ''}`}
               />
+              {stock !== undefined && stock <= 5 && (
+                stock === 0 ? (
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold text-white bg-[hsl(var(--muted-foreground))]">
+                    Épuisé
+                  </div>
+                ) : stock === 1 ? (
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: '#C0392B' }}>
+                    Dernière pièce !
+                  </div>
+                ) : (
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: '#E07B39' }}>
+                    Presque épuisé
+                  </div>
+                )
+              )}
             </div>
             {product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2 md:gap-3">
@@ -97,24 +112,7 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
               </Link>
             )}
 
-            <p className="text-3xl md:text-4xl font-bold text-primary mb-3">{fmtXOF(product.price)}</p>
-
-            {stock !== undefined && stock <= 5 && (
-              <div className="mb-4">
-                {stock === 0 && (
-                  <p className="text-sm font-semibold text-muted-foreground">Épuisé</p>
-                )}
-                {stock === 1 && (
-                  <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                    <AlertTriangle className="h-4 w-4 shrink-0" />
-                    Dernière pièce disponible !
-                  </p>
-                )}
-                {stock >= 2 && stock <= 5 && (
-                  <p className="text-sm font-medium text-accent">Plus que quelques pièces</p>
-                )}
-              </div>
-            )}
+            <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{fmtXOF(product.price)}</p>
 
             <div className="mb-6">
               <h2 className="text-base font-semibold mb-3 text-foreground">{t.product.description}</h2>

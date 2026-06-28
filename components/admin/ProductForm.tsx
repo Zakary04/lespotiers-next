@@ -234,7 +234,31 @@ export default function ProductForm({ product }: Props) {
             <p className="text-xs text-muted-foreground mt-1">Entrez le prix en FCFA (ex: 150000)</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-foreground">Stock</label>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <label className="text-sm font-semibold text-foreground">Stock</label>
+              <div className="relative group">
+                <button
+                  type="button"
+                  className="w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors leading-none"
+                  tabIndex={-1}
+                  aria-label="Info stock"
+                >
+                  i
+                </button>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 hidden group-hover:block z-50 pointer-events-none">
+                  <div className="bg-popover border border-border rounded-xl shadow-lg p-3 text-xs text-foreground leading-relaxed">
+                    <p className="font-semibold mb-1.5">Comment le stock s'affiche pour les visiteurs :</p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li><span className="font-medium text-foreground">Plus de 5</span> → aucun indicateur affiché</li>
+                      <li><span className="font-medium" style={{ color: '#C97B5E' }}>2 à 5 pièces</span> → «&nbsp;Plus que quelques pièces&nbsp;»</li>
+                      <li><span className="font-medium" style={{ color: '#B5612A' }}>1 pièce</span> → «&nbsp;Dernière pièce disponible&nbsp;!&nbsp;»</li>
+                      <li><span className="font-medium text-muted-foreground">0 pièce</span> → «&nbsp;Épuisé&nbsp;» — produit grisé, achat impossible</li>
+                    </ul>
+                  </div>
+                  <div className="w-2 h-2 bg-popover border-b border-r border-border rotate-45 mx-auto -mt-1" />
+                </div>
+              </div>
+            </div>
             <Input
               type="number"
               min="0"

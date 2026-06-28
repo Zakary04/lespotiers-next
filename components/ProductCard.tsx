@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Product } from '@/data/products';
 import { fmtXOF } from '@/lib/utils/currency';
@@ -13,19 +12,22 @@ interface ProductCardProps {
   index?: number;
 }
 
-function StockIndicator({ stock }: { stock: number | undefined }) {
+function StockBadge({ stock }: { stock: number | undefined }) {
   if (stock === undefined || stock > 5) return null
   if (stock === 0) return (
-    <p className="text-xs font-medium text-muted-foreground mt-1.5">Épuisé</p>
+    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full text-xs font-semibold text-white bg-[hsl(var(--muted-foreground))]">
+      Épuisé
+    </div>
   )
   if (stock === 1) return (
-    <p className="text-xs font-semibold mt-1.5 flex items-center gap-1 text-primary">
-      <AlertTriangle className="h-3 w-3 shrink-0" />
-      Dernière pièce disponible !
-    </p>
+    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full text-xs font-semibold text-white" style={{ background: '#C0392B' }}>
+      Dernière pièce !
+    </div>
   )
   return (
-    <p className="text-xs font-medium mt-1.5 text-accent">Plus que quelques pièces</p>
+    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full text-xs font-semibold text-white" style={{ background: '#E07B39' }}>
+      Presque épuisé
+    </div>
   )
 }
 
@@ -41,16 +43,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       <Link href={`/produit/${product.id}`}>
         <div className={`group relative overflow-hidden rounded-2xl bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${outOfStock ? 'opacity-70' : ''}`}>
-          {product.isNew && !outOfStock && (
-            <div className="absolute top-4 right-4 z-10 bg-accent text-white px-3 py-1 rounded-full text-xs font-medium tracking-wide">
+          {product.isNew && (
+            <div className="absolute top-3 left-3 z-10 bg-accent text-white px-2.5 py-1 rounded-full text-xs font-medium tracking-wide">
               {t.home.newBadge}
             </div>
           )}
-          {outOfStock && (
-            <div className="absolute top-4 right-4 z-10 bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium tracking-wide">
-              Épuisé
-            </div>
-          )}
+          <StockBadge stock={product.stock} />
           <div className="product-image-container aspect-square">
             <img
               src={product.images[0]}
@@ -66,7 +64,6 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               {t.product.by} {product.artisan}
             </p>
             <p className="text-2xl font-bold text-primary">{fmtXOF(product.price)}</p>
-            <StockIndicator stock={product.stock} />
           </div>
         </div>
       </Link>
