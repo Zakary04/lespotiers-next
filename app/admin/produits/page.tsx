@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Download, Plus, Search, Pencil, Archive, ArchiveRestore, Package } from 'lucide-react'
+import { Download, Plus, Search, Pencil, Archive, ArchiveRestore, Package, Trash2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,12 +24,21 @@ interface Row {
 
 type CatMap = Record<string, string>
 
+function storagePathFromUrl(url: string): string | null {
+  const marker = '/product-images/'
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  return url.slice(idx + marker.length)
+}
+
 export default function AdminProduitsPage() {
   const [rows, setRows] = useState<Row[]>([])
   const [catMap, setCatMap] = useState<CatMap>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showArchived, setShowArchived] = useState(false)
+  const [confirmRow, setConfirmRow] = useState<Row | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
   async function load() {
@@ -56,6 +65,29 @@ export default function AdminProduitsPage() {
     setRows(prev => prev.map(r => r.id === id ? { ...r, is_archived: !current } : r))
   }
 
+  const handleDelete = async () => {
+    if (!confirmRow) return
+    setDeleting(true)
+
+    const paths = confirmRow.images.map(storagePathFromUrl).filter(Boolean) as string[]
+    if (paths.length > 0) {
+      const { error } = await supabase.storage.from('product-images').remove(paths)
+      if (error) console.error('[deleteProduct] storage error:', error)
+    }
+
+    const { error } = await supabase.from('products').delete().eq('id', confirmRow.id)
+    if (error) {
+      toast.error(error.message)
+      setDeleting(false)
+      return
+    }
+
+    toast.success('Produit supprimé définitivement')
+    setRows(prev => prev.filter(r => r.id !== confirmRow.id))
+    setConfirmRow(null)
+    setDeleting(false)
+  }
+
   const exportProduits = () => {
     const exportRows = rows.map(r => ({
       'Nom du produit':  r.name,
@@ -80,6 +112,55 @@ export default function AdminProduitsPage() {
 
   return (
     <div className="space-y-6">
+
+      {/* Confirmation dialog */}
+      {confirmRow && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-destructive/10 p-2.5 shrink-0">
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground text-base">Supprimer définitivement</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Êtes-vous sûr de vouloir supprimer définitivement{' '}
+                  <span className="font-medium text-foreground">«&nbsp;{confirmRow.name}&nbsp;»</span> ?
+                  Cette action est irréversible.
+                </p>
+                {confirmRow.images.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {confirmRow.images.length} image{confirmRow.images.length > 1 ? 's' : ''} sera également supprimée{confirmRow.images.length > 1 ? 's' : ''} du stockage.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button
+                variant="outline"
+                className="border-border"
+                onClick={() => setConfirmRow(null)}
+                disabled={deleting}
+              >
+                Annuler
+              </Button>
+              <Button
+                className="bg-destructive text-white hover:bg-destructive/90 gap-1.5"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                Supprimer définitivement
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Cinzel, serif' }}>Produits</h1>
@@ -195,6 +276,15 @@ export default function AdminProduitsPage() {
                         >
                           {r.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setConfirmRow(r)}
+                          title="Supprimer définitivement"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -224,6 +314,14 @@ export default function AdminProduitsPage() {
                   </Link>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleArchive(r.id, r.is_archived)}>
                     {r.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setConfirmRow(r)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
