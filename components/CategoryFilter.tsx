@@ -3,10 +3,15 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+interface CategoryOption {
+  slug: string;
+  label: string;
+}
+
 interface CategoryFilterProps {
   selected: string;
   onSelect: (category: string) => void;
-  categories: string[];
+  categories: CategoryOption[];
 }
 
 export default function CategoryFilter({ selected, onSelect, categories }: CategoryFilterProps) {
@@ -24,17 +29,17 @@ export default function CategoryFilter({ selected, onSelect, categories }: Categ
       >
         {t.shop.allCategories}
       </button>
-      {categories.map(category => (
+      {categories.map(({ slug, label }) => (
         <button
-          key={category}
-          onClick={() => onSelect(category)}
+          key={slug}
+          onClick={() => onSelect(slug)}
           className={`w-full text-left px-4 py-2.5 rounded-xl transition-all duration-200 ${
-            selected === category
+            selected === slug
               ? 'bg-primary text-primary-foreground font-medium'
               : 'bg-muted text-foreground hover:bg-muted/80'
           }`}
         >
-          {t.shop.categories[category as keyof typeof t.shop.categories]}
+          {label}
         </button>
       ))}
     </div>

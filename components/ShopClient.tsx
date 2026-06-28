@@ -12,15 +12,24 @@ import type { Product } from '@/data/products';
 import type { Artisan } from '@/data/artisans';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const CATEGORIES = ['vases', 'bowls', 'jars', 'decorative'];
+interface DbCategory {
+  slug: string;
+  label_fr: string;
+  label_en: string;
+}
 
 interface Props {
   products: Product[];
   artisans: Artisan[];
+  categories: DbCategory[];
 }
 
-export default function ShopClient({ products, artisans }: Props) {
-  const { t } = useLanguage();
+export default function ShopClient({ products, artisans, categories }: Props) {
+  const { t, language } = useLanguage();
+  const categoryOptions = categories.map(c => ({
+    slug: c.slug,
+    label: language === 'fr' ? c.label_fr : c.label_en,
+  }));
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedArtisan, setSelectedArtisan] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 500]);
@@ -85,7 +94,7 @@ export default function ShopClient({ products, artisans }: Props) {
 
       <div>
         <h4 className="text-xs font-semibold mb-3 text-muted-foreground tracking-widest uppercase">Catégorie</h4>
-        <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} categories={CATEGORIES} />
+        <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} categories={categoryOptions} />
       </div>
 
       <div>

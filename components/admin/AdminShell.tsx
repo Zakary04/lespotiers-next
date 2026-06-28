@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Hammer, ShoppingBag, Users, FileText,
-  BarChart2, LogOut, ExternalLink, Menu, X, ChevronRight,
+  BarChart2, LogOut, ExternalLink, Menu, X, ChevronRight, Tag,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -16,6 +16,7 @@ const NAV = [
   { href: '/admin/commandes',    label: 'Commandes',       icon: ShoppingBag, exact: false },
   { href: '/admin/utilisateurs', label: 'Utilisateurs',    icon: Users,       exact: false },
   { href: '/admin/analytics',    label: 'Analytiques',     icon: BarChart2,   exact: false },
+  { href: '/admin/categories',   label: 'Catégories',      icon: Tag,         exact: false },
   { href: '/admin/contenu',      label: 'Contenu du site', icon: FileText,    exact: false },
 ]
 

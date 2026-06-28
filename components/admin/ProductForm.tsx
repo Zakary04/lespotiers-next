@@ -10,14 +10,8 @@ import { toast } from 'sonner'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { createClient } from '@/lib/supabase/client'
 
-const CATEGORIES = [
-  { value: 'vases', label: 'Vases' },
-  { value: 'bowls', label: 'Bols' },
-  { value: 'jars', label: 'Jarres' },
-  { value: 'decorative', label: 'Décoratifs' },
-]
-
 interface ArtisanOpt { id: number; name: string }
+interface CategoryOpt { slug: string; label_fr: string }
 
 interface RawProduct {
   id: string
@@ -64,6 +58,7 @@ export default function ProductForm({ product }: Props) {
   const isEdit = !!product
 
   const [artisans, setArtisans] = useState<ArtisanOpt[]>([])
+  const [categories, setCategories] = useState<CategoryOpt[]>([])
   const [images, setImages] = useState<(File | string)[]>(product?.images ?? [])
   const [saving, setSaving] = useState(false)
 
@@ -86,6 +81,9 @@ export default function ProductForm({ product }: Props) {
   useEffect(() => {
     supabase.from('artisans').select('id, name').order('name').then(({ data }) => {
       setArtisans(data ?? [])
+    })
+    supabase.from('categories').select('slug, label_fr').order('label_fr').then(({ data }) => {
+      setCategories(data ?? [])
     })
   }, [])
 
@@ -210,7 +208,7 @@ export default function ProductForm({ product }: Props) {
               onChange={set('category')}
               className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              {categories.map(c => <option key={c.slug} value={c.slug}>{c.label_fr}</option>)}
             </select>
           </div>
         </div>

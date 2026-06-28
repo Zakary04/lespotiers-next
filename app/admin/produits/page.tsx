@@ -22,12 +22,11 @@ interface Row {
   created_at: string
 }
 
-const CAT: Record<string, string> = {
-  vases: 'Vases', bowls: 'Bols', jars: 'Jarres', decorative: 'Décoratifs',
-}
+type CatMap = Record<string, string>
 
 export default function AdminProduitsPage() {
   const [rows, setRows] = useState<Row[]>([])
+  const [catMap, setCatMap] = useState<CatMap>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showArchived, setShowArchived] = useState(false)
@@ -35,11 +34,17 @@ export default function AdminProduitsPage() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase
-      .from('products')
-      .select('id, name, artisan_name, category, price, stock, is_new, is_archived, images, created_at')
-      .order('name')
-    setRows(data ?? [])
+    const [{ data: products }, { data: cats }] = await Promise.all([
+      supabase
+        .from('products')
+        .select('id, name, artisan_name, category, price, stock, is_new, is_archived, images, created_at')
+        .order('name'),
+      supabase.from('categories').select('slug, label_fr'),
+    ])
+    setRows(products ?? [])
+    const map: CatMap = {}
+    for (const c of cats ?? []) map[c.slug] = c.label_fr
+    setCatMap(map)
     setLoading(false)
   }
 
@@ -56,7 +61,7 @@ export default function AdminProduitsPage() {
       'Nom du produit':  r.name,
       'Prix (€)':        r.price,
       'Stock':           r.stock ?? 0,
-      'Catégorie':       CAT[r.category] ?? r.category,
+      'Catégorie':       catMap[r.category] ?? r.category,
       'Artisan':         r.artisan_name,
       'Nouveau':         r.is_new ? 'Oui' : 'Non',
       'Statut':          r.is_archived ? 'Archivé' : 'Actif',
@@ -161,7 +166,7 @@ export default function AdminProduitsPage() {
                     <td className="px-4 py-3 text-muted-foreground">{r.artisan_name}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                        {CAT[r.category] ?? r.category}
+                        {catMap[r.category] ?? r.category}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-foreground">{r.price.toFixed(2)} €</td>
