@@ -44,12 +44,16 @@ function makeId(name: string, artisanName: string) {
   return `${normalize(name)}-${normalize(artisanName.split(/\s+/)[0])}`
 }
 
-async function uploadImage(file: File, supabase: ReturnType<typeof createClient>): Promise<string | null> {
+async function uploadImage(file: File, supabase: ReturnType<typeof createClient>): Promise<{ url: string | null; error: string | null }> {
   const ext = file.name.split('.').pop() ?? 'jpg'
   const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`
   const { error } = await supabase.storage.from('product-images').upload(path, file, { cacheControl: '3600', upsert: false })
-  if (error) return null
-  return supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl
+  if (error) {
+    console.error('[uploadImage] Supabase storage error:', error)
+    return { url: null, error: error.message }
+  }
+  const url = supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl
+  return { url, error: null }
 }
 
 export default function ProductForm({ product }: Props) {
@@ -101,23 +105,19 @@ export default function ProductForm({ product }: Props) {
 
     // Upload new images
     const imageUrls: string[] = []
-    let uploadFailed = false
     for (const img of images) {
       if (typeof img === 'string') {
         imageUrls.push(img)
       } else {
-        const url = await uploadImage(img, supabase)
-        if (url) {
-          imageUrls.push(url)
-        } else {
-          uploadFailed = true
-          toast.error('Échec upload d\'une image. Vérifiez le bucket Supabase "product-images".')
-          break
+        const { url, error: uploadError } = await uploadImage(img, supabase)
+        if (!url) {
+          toast.error(`Échec upload image : ${uploadError ?? 'erreur inconnue'}`)
+          setSaving(false)
+          return
         }
+        imageUrls.push(url)
       }
     }
-
-    if (uploadFailed) { setSaving(false); return }
 
     const artisan = artisans.find(a => a.id === Number(form.artisanId))
     const payload = {
@@ -278,9 +278,6 @@ export default function ProductForm({ product }: Props) {
       {/* Images */}
       <section className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <h2 className="font-semibold text-foreground">Photos du produit</h2>
-        <p className="text-xs text-muted-foreground">
-          Nécessite le bucket Supabase Storage <code className="bg-muted px-1 rounded">product-images</code> (public).
-        </p>
         <ImageUpload value={images} onChange={setImages} max={5} />
       </section>
 
