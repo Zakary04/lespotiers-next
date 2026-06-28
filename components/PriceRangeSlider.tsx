@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
+import { fmtXOF } from '@/lib/utils/currency';
 
 interface PriceRangeSliderProps {
   min: number;
@@ -14,8 +15,8 @@ export default function PriceRangeSlider({ min, max, value, onChange }: PriceRan
   return (
     <div className="space-y-4">
       <div className="flex justify-between text-sm text-muted-foreground">
-        <span>€{value[0]}</span>
-        <span>€{value[1]}</span>
+        <span>{fmtXOF(value[0])}</span>
+        <span>{fmtXOF(value[1])}</span>
       </div>
       <Slider
         min={min}

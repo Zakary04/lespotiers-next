@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { fmtXOF, toXOF } from '@/lib/utils/currency'
 
 interface Row {
   id: string
@@ -91,7 +92,7 @@ export default function AdminProduitsPage() {
   const exportProduits = () => {
     const exportRows = rows.map(r => ({
       'Nom du produit':  r.name,
-      'Prix (€)':        r.price,
+      'Prix (FCFA)':     toXOF(r.price),
       'Stock':           r.stock ?? 0,
       'Catégorie':       catMap[r.category] ?? r.category,
       'Artisan':         r.artisan_name,
@@ -250,7 +251,7 @@ export default function AdminProduitsPage() {
                         {catMap[r.category] ?? r.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-foreground">{r.price.toFixed(2)} €</td>
+                    <td className="px-4 py-3 text-right font-semibold text-foreground">{fmtXOF(r.price)}</td>
                     <td className="px-4 py-3 text-right">
                       <span className={`font-semibold ${(r.stock ?? 1) === 0 ? 'text-red-500' : 'text-green-500'}`}>
                         {r.stock ?? 1}
@@ -304,7 +305,7 @@ export default function AdminProduitsPage() {
                   <p className="font-semibold text-foreground text-sm truncate">{r.name}</p>
                   <p className="text-xs text-muted-foreground">{r.artisan_name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-foreground">{r.price.toFixed(2)} €</span>
+                    <span className="text-xs font-bold text-foreground">{fmtXOF(r.price)}</span>
                     <span className="text-xs text-muted-foreground">· Stock: {r.stock ?? 1}</span>
                   </div>
                 </div>

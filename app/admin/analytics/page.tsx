@@ -9,6 +9,7 @@ import { Calendar, CreditCard, Download, Package, ShoppingBag, Star, TrendingUp,
 import { Button } from '@/components/ui/button'
 import * as XLSX from 'xlsx'
 import { createClient } from '@/lib/supabase/client'
+import { fmtXOF, toXOF } from '@/lib/utils/currency'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -284,7 +285,7 @@ function ProductTooltip({ active, payload }: { active?: boolean; payload?: { pay
     <div style={TT} className="px-3 py-2 space-y-0.5">
       <p className="font-semibold text-[13px]" style={{ color: C.light }}>{d.fullName}</p>
       <p style={{ color: C.primary }}>Qté vendue : <strong>{d.qty}</strong></p>
-      <p style={{ color: C.accent }}>Revenu : <strong>{d.revenue.toFixed(2)} €</strong></p>
+      <p style={{ color: C.accent }}>Revenu : <strong>{fmtXOF(d.revenue)}</strong></p>
     </div>
   )
 }
@@ -330,22 +331,22 @@ export default function AdminAnalyticsPage() {
   const exportAnalytics = () => {
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
-      { 'Indicateur': "Chiffre d'affaires",  'Valeur': `${kpis.totalRevenue.toFixed(2)} €` },
+      { 'Indicateur': "Chiffre d'affaires",  'Valeur': fmtXOF(kpis.totalRevenue) },
       { 'Indicateur': 'Commandes',            'Valeur': kpis.totalOrders },
-      { 'Indicateur': 'Panier moyen',         'Valeur': `${kpis.avgCart.toFixed(2)} €` },
+      { 'Indicateur': 'Panier moyen',         'Valeur': fmtXOF(kpis.avgCart) },
       { 'Indicateur': 'Clients uniques',      'Valeur': kpis.totalCustomers },
       { 'Indicateur': 'Produit phare',        'Valeur': kpis.bestProduct },
-      { 'Indicateur': 'Commande max',         'Valeur': `${kpis.maxOrder.toFixed(2)} €` },
+      { 'Indicateur': 'Commande max',         'Valeur': fmtXOF(kpis.maxOrder) },
       { 'Indicateur': 'Période',              'Valeur': periodDesc(period, from, to) },
     ]), 'KPIs')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
-      timeSeries.map(d => ({ 'Période': d.label, 'CA (€)': d.revenue, 'Commandes': d.orders }))
+      timeSeries.map(d => ({ 'Période': d.label, 'CA (FCFA)': toXOF(d.revenue), 'Commandes': d.orders }))
     ), 'CA & volume')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
-      topProducts.map(p => ({ 'Produit': p.fullName, 'Quantité vendue': p.qty, 'Revenu (€)': p.revenue.toFixed(2) }))
+      topProducts.map(p => ({ 'Produit': p.fullName, 'Quantité vendue': p.qty, 'Revenu (FCFA)': toXOF(p.revenue) }))
     ), 'Top produits')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
-      topCountries.map(c => ({ 'Pays': c.country, 'Commandes': c.orders, 'Revenu (€)': c.revenue.toFixed(2) }))
+      topCountries.map(c => ({ 'Pays': c.country, 'Commandes': c.orders, 'Revenu (FCFA)': toXOF(c.revenue) }))
     ), 'Top pays')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
       statusData.map(s => ({ 'Statut': s.name, 'Commandes': s.value }))
@@ -435,7 +436,7 @@ export default function AdminAnalyticsPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         <KPICard
           label="Chiffre d'affaires"
-          value={`${kpis.totalRevenue.toFixed(2)} €`}
+          value={fmtXOF(kpis.totalRevenue)}
           icon={CreditCard}
           color={C.primary}
         />
@@ -447,7 +448,7 @@ export default function AdminAnalyticsPage() {
         />
         <KPICard
           label="Panier moyen"
-          value={`${kpis.avgCart.toFixed(2)} €`}
+          value={fmtXOF(kpis.avgCart)}
           icon={Package}
           color={C.primary}
         />
@@ -466,7 +467,7 @@ export default function AdminAnalyticsPage() {
         />
         <KPICard
           label="Commande max"
-          value={`${kpis.maxOrder.toFixed(2)} €`}
+          value={fmtXOF(kpis.maxOrder)}
           icon={TrendingUp}
           color={C.accent}
         />
@@ -486,13 +487,13 @@ export default function AdminAnalyticsPage() {
                 interval={xInterval}
                 {...AXIS_PROPS}
               />
-              <YAxis yAxisId="rev" tickFormatter={v => `${v}€`} tick={TICK} {...AXIS_PROPS} width={64} />
+              <YAxis yAxisId="rev" tickFormatter={v => fmtXOF(v)} tick={TICK} {...AXIS_PROPS} width={64} />
               <YAxis yAxisId="cnt" orientation="right" allowDecimals={false} tick={TICK} {...AXIS_PROPS} width={32} />
               <Tooltip
                 contentStyle={TT}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={((v: number, name: string) =>
-                  name === 'revenue' ? [`${v.toFixed(2)} €`, 'CA'] : [v, 'Commandes']
+                  name === 'revenue' ? [fmtXOF(v), 'CA'] : [v, 'Commandes']
                 ) as any}
               />
               <Legend wrapperStyle={{ fontSize: '11px', color: '#8A7A6A', paddingTop: '12px' }} />
@@ -532,7 +533,7 @@ export default function AdminAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
                   <YAxis dataKey="name" type="category" tick={{ ...TICK, textAnchor: 'end' }} {...AXIS_PROPS} width={145} />
                   <XAxis xAxisId="qty" type="number" orientation="bottom" tick={TICK} {...AXIS_PROPS} allowDecimals={false} />
-                  <XAxis xAxisId="rev" type="number" orientation="top"    tick={TICK} {...AXIS_PROPS} tickFormatter={v => `${v}€`} />
+                  <XAxis xAxisId="rev" type="number" orientation="top"    tick={TICK} {...AXIS_PROPS} tickFormatter={v => fmtXOF(v)} />
                   <Tooltip content={<ProductTooltip />} />
                   <Bar xAxisId="qty" dataKey="qty"     name="Quantité" fill={C.primary} radius={[0, 3, 3, 0]} barSize={9} />
                   <Bar xAxisId="rev" dataKey="revenue" name="Revenu €" fill={C.accent}  radius={[0, 3, 3, 0]} barSize={9} />
@@ -593,12 +594,12 @@ export default function AdminAnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="country" tick={TICK} {...AXIS_PROPS} />
               <YAxis yAxisId="cnt" allowDecimals={false} tick={TICK} {...AXIS_PROPS} />
-              <YAxis yAxisId="rev" orientation="right" tickFormatter={v => `${v}€`} tick={TICK} {...AXIS_PROPS} width={64} />
+              <YAxis yAxisId="rev" orientation="right" tickFormatter={v => fmtXOF(v)} tick={TICK} {...AXIS_PROPS} width={64} />
               <Tooltip
                 contentStyle={TT}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={((v: number, name: string) =>
-                  name === 'revenue' ? [`${v.toFixed(2)} €`, 'Revenu'] : [v, 'Commandes']
+                  name === 'revenue' ? [fmtXOF(v), 'Revenu'] : [v, 'Commandes']
                 ) as any}
               />
               <Legend wrapperStyle={{ fontSize: '11px', color: '#8A7A6A', paddingTop: '10px' }} />

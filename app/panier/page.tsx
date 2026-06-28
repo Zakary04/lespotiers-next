@@ -9,6 +9,10 @@ import { Separator } from '@/components/ui/separator';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
+import { fmtXOF, toXOF } from '@/lib/utils/currency';
+
+const SHIPPING_THRESHOLD_EUR = 150
+const SHIPPING_COST_EUR = 12.9
 
 function QuantityControl({
   value,
@@ -46,7 +50,7 @@ export default function PanierPage() {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, isLoadingCart } = useCart();
   const router = useRouter();
 
-  const shippingCost = cartTotal >= 150 ? 0 : 12.9;
+  const shippingCost = cartTotal >= SHIPPING_THRESHOLD_EUR ? 0 : SHIPPING_COST_EUR;
   const total = cartTotal + shippingCost;
 
   return (
@@ -131,13 +135,13 @@ export default function PanierPage() {
                           </Link>
                           <p className="text-sm text-muted-foreground mt-0.5">{item.artisan}</p>
                           <p className="text-sm text-muted-foreground mt-0.5">
-                            {item.price.toFixed(2)} € / pièce
+                            {fmtXOF(item.price)} / pièce
                           </p>
                         </div>
 
                         <div className="hidden sm:block text-right shrink-0">
                           <p className="font-bold text-foreground text-lg">
-                            {(item.price * item.quantity).toFixed(2)} €
+                            {fmtXOF(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -151,7 +155,7 @@ export default function PanierPage() {
 
                         <div className="flex items-center gap-4">
                           <span className="sm:hidden font-bold text-foreground">
-                            {(item.price * item.quantity).toFixed(2)} €
+                            {fmtXOF(item.price * item.quantity)}
                           </span>
                           <button
                             onClick={() => removeFromCart(item.id)}
@@ -189,7 +193,7 @@ export default function PanierPage() {
                       <span className="text-muted-foreground">
                         Sous-total ({cartCount} article{cartCount > 1 ? 's' : ''})
                       </span>
-                      <span className="text-foreground font-medium">{cartTotal.toFixed(2)} €</span>
+                      <span className="text-foreground font-medium">{fmtXOF(cartTotal)}</span>
                     </div>
 
                     <div className="flex justify-between text-sm">
@@ -197,17 +201,17 @@ export default function PanierPage() {
                       {shippingCost === 0 ? (
                         <span className="text-green-500 font-medium">Offerte</span>
                       ) : (
-                        <span className="text-foreground font-medium">{shippingCost.toFixed(2)} €</span>
+                        <span className="text-foreground font-medium">{fmtXOF(shippingCost)}</span>
                       )}
                     </div>
 
                     {shippingCost > 0 && (
                       <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
                         Livraison offerte dès{' '}
-                        <span className="font-semibold text-foreground">150 €</span>
+                        <span className="font-semibold text-foreground">{fmtXOF(SHIPPING_THRESHOLD_EUR)}</span>
                         {' — '}il vous reste{' '}
                         <span className="font-semibold text-primary">
-                          {(150 - cartTotal).toFixed(2)} €
+                          {fmtXOF(SHIPPING_THRESHOLD_EUR - cartTotal)}
                         </span>
                       </p>
                     )}
@@ -217,7 +221,7 @@ export default function PanierPage() {
 
                   <div className="flex justify-between items-baseline mb-6">
                     <span className="font-bold text-foreground">Total</span>
-                    <span className="text-2xl font-bold text-primary">{total.toFixed(2)} €</span>
+                    <span className="text-2xl font-bold text-primary">{fmtXOF(total)}</span>
                   </div>
 
                   <Button

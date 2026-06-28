@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { fmtXOF } from '@/lib/utils/currency'
 
 interface OrderItem {
   product_name: string
@@ -105,10 +106,10 @@ function ConfirmationContent() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground line-clamp-1">{item.product_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {item.quantity} × {item.unit_price.toFixed(2)} € — par {item.artisan_name}
+                      {item.quantity} × {fmtXOF(item.unit_price)} — par {item.artisan_name}
                     </p>
                   </div>
-                  <p className="font-semibold text-foreground shrink-0">{item.subtotal.toFixed(2)} €</p>
+                  <p className="font-semibold text-foreground shrink-0">{fmtXOF(item.subtotal)}</p>
                 </div>
               ))}
             </div>
@@ -134,18 +135,18 @@ function ConfirmationContent() {
           <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Sous-total</span>
-              <span className="font-medium text-foreground">{order.subtotal.toFixed(2)} €</span>
+              <span className="font-medium text-foreground">{fmtXOF(order.subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Livraison</span>
               {order.shipping === 0
                 ? <span className="text-green-500 font-medium">Offerte</span>
-                : <span className="font-medium text-foreground">{order.shipping.toFixed(2)} €</span>}
+                : <span className="font-medium text-foreground">{fmtXOF(order.shipping)}</span>}
             </div>
             <Separator className="bg-border" />
             <div className="flex justify-between">
               <span className="font-bold text-foreground">Total payé</span>
-              <span className="text-xl font-bold text-primary">{order.total.toFixed(2)} €</span>
+              <span className="text-xl font-bold text-primary">{fmtXOF(order.total)}</span>
             </div>
           </div>
         </div>

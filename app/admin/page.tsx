@@ -6,6 +6,7 @@ import { Download, LayoutDashboard, Package, Hammer, ShoppingBag, Users, Trendin
 import * as XLSX from 'xlsx'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
+import { fmtXOF, toXOF } from '@/lib/utils/currency'
 
 interface Stats {
   products: number
@@ -58,7 +59,7 @@ export default function AdminDashboard() {
         monthlyMap.set(key, (monthlyMap.get(key) ?? 0) + o.total_amount)
       }
       const kpiRows = [
-        { 'Indicateur': 'CA mois en cours',  'Valeur': stats ? `${stats.revenue.toFixed(2)} €` : '—' },
+        { 'Indicateur': 'CA mois en cours',  'Valeur': stats ? fmtXOF(stats.revenue) : '—' },
         { 'Indicateur': 'Commandes ce mois', 'Valeur': stats?.orders ?? 0 },
         { 'Indicateur': 'Produits actifs',   'Valeur': stats?.products ?? 0 },
         { 'Indicateur': 'Clients inscrits',  'Valeur': stats?.customers ?? 0 },
@@ -67,7 +68,7 @@ export default function AdminDashboard() {
       const monthlyRows = Array.from({ length: 12 }, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
         const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
-        return { 'Mois': `${MONTHS[d.getMonth()]} ${d.getFullYear()}`, 'CA (€)': monthlyMap.get(key) ?? 0 }
+        return { 'Mois': `${MONTHS[d.getMonth()]} ${d.getFullYear()}`, 'CA (FCFA)': toXOF(monthlyMap.get(key) ?? 0) }
       })
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kpiRows), 'KPIs')
@@ -114,8 +115,8 @@ export default function AdminDashboard() {
   }, [])
 
   const statCards = [
-    { icon: ShoppingBag, label: 'Commandes ce mois', value: stats?.orders ?? '—', sub: `${stats?.revenue?.toFixed(0) ?? '—'} € de CA`, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { icon: TrendingUp,  label: 'Chiffre d\'affaires', value: stats ? `${stats.revenue.toFixed(0)} €` : '—', sub: 'ce mois', color: 'text-green-500', bg: 'bg-green-500/10' },
+    { icon: ShoppingBag, label: 'Commandes ce mois', value: stats?.orders ?? '—', sub: stats ? `${fmtXOF(stats.revenue)} de CA` : '—', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: TrendingUp,  label: 'Chiffre d\'affaires', value: stats ? fmtXOF(stats.revenue) : '—', sub: 'ce mois', color: 'text-green-500', bg: 'bg-green-500/10' },
     { icon: Package,     label: 'Produits actifs', value: stats?.products ?? '—', sub: 'en catalogue', color: 'text-primary', bg: 'bg-primary/10', href: '/admin/produits' },
     { icon: Users,       label: 'Clients', value: stats?.customers ?? '—', sub: 'inscrits', color: 'text-purple-500', bg: 'bg-purple-500/10', href: '/admin/utilisateurs' },
   ]
@@ -213,7 +214,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">{o.customer_name ?? o.customer_email}</p>
                   </div>
                   <span className={`hidden sm:inline-flex text-xs font-semibold px-2.5 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
-                  <p className="text-sm font-bold text-foreground shrink-0">{o.total_amount.toFixed(2)} €</p>
+                  <p className="text-sm font-bold text-foreground shrink-0">{fmtXOF(o.total_amount)}</p>
                 </div>
               )
             })}

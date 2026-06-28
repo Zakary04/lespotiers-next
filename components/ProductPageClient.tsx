@@ -10,6 +10,7 @@ import type { Product } from '@/data/products';
 import type { Artisan } from '@/data/artisans';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { fmtXOF } from '@/lib/utils/currency';
 
 interface Props {
   product: Product;
@@ -94,7 +95,7 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
               </Link>
             )}
 
-            <p className="text-3xl md:text-4xl font-bold text-primary mb-6">€{product.price}</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{fmtXOF(product.price)}</p>
 
             <div className="mb-6">
               <h2 className="text-base font-semibold mb-3 text-foreground">{t.product.description}</h2>

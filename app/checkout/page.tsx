@@ -16,6 +16,7 @@ import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { createClient } from '@/lib/supabase/client'
+import { fmtXOF } from '@/lib/utils/currency'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -250,9 +251,9 @@ export default function CheckoutPage() {
                         <div className="min-w-0">
                           <p className="font-semibold text-foreground text-sm line-clamp-1">{item.name}</p>
                           <p className="text-xs text-muted-foreground">{item.artisan}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.price.toFixed(2)} € / pièce</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{fmtXOF(item.price)} / pièce</p>
                         </div>
-                        <p className="font-bold text-foreground shrink-0">{(item.price * item.quantity).toFixed(2)} €</p>
+                        <p className="font-bold text-foreground shrink-0">{fmtXOF(item.price * item.quantity)}</p>
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <QtyControl
@@ -273,23 +274,23 @@ export default function CheckoutPage() {
               <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Sous-total ({cartCount} article{cartCount > 1 ? 's' : ''})</span>
-                  <span className="font-medium text-foreground">{cartTotal.toFixed(2)} €</span>
+                  <span className="font-medium text-foreground">{fmtXOF(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Livraison</span>
                   {shipping === 0
                     ? <span className="text-green-500 font-medium">Offerte</span>
-                    : <span className="font-medium text-foreground">{shipping.toFixed(2)} €</span>}
+                    : <span className="font-medium text-foreground">{fmtXOF(shipping)}</span>}
                 </div>
                 {shipping > 0 && (
                   <p className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
-                    Livraison offerte dès 150 €
+                    Livraison offerte dès {fmtXOF(SHIPPING_THRESHOLD)}
                   </p>
                 )}
                 <Separator className="bg-border" />
                 <div className="flex justify-between">
                   <span className="font-bold text-foreground">Total</span>
-                  <span className="text-xl font-bold text-primary">{total.toFixed(2)} €</span>
+                  <span className="text-xl font-bold text-primary">{fmtXOF(total)}</span>
                 </div>
               </div>
 
@@ -385,9 +386,9 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground line-clamp-1">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">{item.quantity} × {item.price.toFixed(2)} €</p>
+                        <p className="text-xs text-muted-foreground">{item.quantity} × {fmtXOF(item.price)}</p>
                       </div>
-                      <p className="font-semibold text-foreground shrink-0">{(item.price * item.quantity).toFixed(2)} €</p>
+                      <p className="font-semibold text-foreground shrink-0">{fmtXOF(item.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
@@ -413,18 +414,18 @@ export default function CheckoutPage() {
               <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Sous-total</span>
-                  <span className="font-medium text-foreground">{cartTotal.toFixed(2)} €</span>
+                  <span className="font-medium text-foreground">{fmtXOF(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Frais de livraison</span>
                   {shipping === 0
                     ? <span className="text-green-500 font-medium">Offerts</span>
-                    : <span className="font-medium text-foreground">{shipping.toFixed(2)} €</span>}
+                    : <span className="font-medium text-foreground">{fmtXOF(shipping)}</span>}
                 </div>
                 <Separator className="bg-border" />
                 <div className="flex justify-between">
                   <span className="font-bold text-foreground">Total TTC</span>
-                  <span className="text-xl font-bold text-primary">{total.toFixed(2)} €</span>
+                  <span className="text-xl font-bold text-primary">{fmtXOF(total)}</span>
                 </div>
               </div>
 
@@ -463,16 +464,16 @@ export default function CheckoutPage() {
                 <div className="bg-muted/50 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Sous-total</span>
-                    <span className="text-foreground">{cartTotal.toFixed(2)} €</span>
+                    <span className="text-foreground">{fmtXOF(cartTotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Livraison</span>
-                    <span className="text-foreground">{shipping === 0 ? 'Offerte' : `${shipping.toFixed(2)} €`}</span>
+                    <span className="text-foreground">{shipping === 0 ? 'Offerte' : fmtXOF(shipping)}</span>
                   </div>
                   <Separator className="bg-border" />
                   <div className="flex justify-between font-bold">
                     <span className="text-foreground">Total à payer</span>
-                    <span className="text-primary text-xl">{total.toFixed(2)} €</span>
+                    <span className="text-primary text-xl">{fmtXOF(total)}</span>
                   </div>
                 </div>
 

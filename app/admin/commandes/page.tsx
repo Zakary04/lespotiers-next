@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { fmtXOF, toXOF } from '@/lib/utils/currency'
 
 interface ShippingAddress {
   firstName:  string
@@ -112,8 +113,8 @@ export default function AdminCommandesPage() {
       if (city    && o.shipping_address?.city    !== city)    return false
       if (dateFrom && o.created_at < dateFrom)  return false
       if (toDate   && o.created_at > toDate)    return false
-      if (minAmt && o.total_amount < parseFloat(minAmt)) return false
-      if (maxAmt && o.total_amount > parseFloat(maxAmt)) return false
+      if (minAmt && toXOF(o.total_amount) < parseFloat(minAmt)) return false
+      if (maxAmt && toXOF(o.total_amount) > parseFloat(maxAmt)) return false
       return true
     })
   }, [orders, statusTab, search, country, city, dateFrom, dateTo, minAmt, maxAmt])
@@ -141,8 +142,8 @@ export default function AdminCommandesPage() {
       'Pays':                o.shipping_address?.country    ?? '',
       'Téléphone':           o.shipping_address?.phone      ?? '',
       'Produits':            (o.items ?? []).map(i => `${i.quantity}× ${i.product_name}`).join(' | '),
-      'Prix unitaires (€)':  (o.items ?? []).map(i => `${(i.unit_price ?? 0).toFixed(2)}`).join(' | '),
-      'Montant total (€)':   o.total_amount,
+      'Prix unitaires (FCFA)': (o.items ?? []).map(i => toXOF(i.unit_price ?? 0)).join(' | '),
+      'Montant total (FCFA)':  toXOF(o.total_amount),
       'Statut':              STATUS_STYLE[o.status]?.label ?? o.status,
       'Adresse':             o.shipping_address?.address    ?? '',
       'Code postal':         o.shipping_address?.postalCode ?? '',
@@ -185,7 +186,7 @@ export default function AdminCommandesPage() {
       'Ville':                     c.city,
       'Pays':                      c.country,
       'Nombre de commandes':       c.count,
-      'Montant total dépensé (€)': c.total,
+      'Montant total dépensé (FCFA)': toXOF(c.total),
       'Première commande':         fmtDate(c.first),
       'Dernière commande':         fmtDate(c.last),
     }))
@@ -299,7 +300,7 @@ export default function AdminCommandesPage() {
               type="number"
               value={minAmt}
               onChange={e => setMinAmt(e.target.value)}
-              placeholder="Min €"
+              placeholder="Min FCFA"
               min="0"
               className={fieldCls}
             />
@@ -307,7 +308,7 @@ export default function AdminCommandesPage() {
               type="number"
               value={maxAmt}
               onChange={e => setMaxAmt(e.target.value)}
-              placeholder="Max €"
+              placeholder="Max FCFA"
               min="0"
               className={fieldCls}
             />
@@ -366,7 +367,7 @@ export default function AdminCommandesPage() {
                     <p className="text-xs text-muted-foreground mt-0.5">{fmtDate(o.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <p className="text-lg font-bold text-foreground">{o.total_amount.toFixed(2)} €</p>
+                    <p className="text-lg font-bold text-foreground">{fmtXOF(o.total_amount)}</p>
                     {o.status === 'paid' && (
                       <Button
                         size="sm"
@@ -384,7 +385,7 @@ export default function AdminCommandesPage() {
                   <div className="mt-3 pt-3 border-t border-border space-y-1">
                     {o.items.map((item, i) => (
                       <p key={i} className="text-xs text-muted-foreground">
-                        {item.quantity}× {item.product_name} — {(item.unit_price ?? 0).toFixed(2)} €
+                        {item.quantity}× {item.product_name} — {fmtXOF(item.unit_price ?? 0)}
                       </p>
                     ))}
                   </div>

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import { products } from '@/data/products';
 import { artisans } from '@/data/artisans';
+import { fmtXOF } from '@/lib/utils/currency';
 
 interface SearchOverlayProps {
   onClose: () => void;
@@ -180,7 +181,7 @@ export default function SearchOverlay({ onClose }: SearchOverlayProps) {
                         <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
                         <p className="text-xs text-muted-foreground truncate">{product.artisan}</p>
                       </div>
-                      <p className="text-sm font-bold text-primary shrink-0">€{product.price}</p>
+                      <p className="text-sm font-bold text-primary shrink-0">{fmtXOF(product.price)}</p>
                     </button>
                   );
                 })}

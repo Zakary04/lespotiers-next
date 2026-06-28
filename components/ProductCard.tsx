@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Product } from '@/data/products';
+import { fmtXOF } from '@/lib/utils/currency';
 
 interface ProductCardProps {
   product: Product;
@@ -41,7 +42,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             <p className="text-sm text-muted-foreground mb-3">
               {t.product.by} {product.artisan}
             </p>
-            <p className="text-2xl font-bold text-primary">€{product.price}</p>
+            <p className="text-2xl font-bold text-primary">{fmtXOF(product.price)}</p>
           </div>
         </div>
       </Link>
