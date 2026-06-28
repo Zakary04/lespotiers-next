@@ -1,11 +1,9 @@
-const EUR_TO_XOF = 655.957
-
-/** Convert EUR to XOF, rounded to nearest 100 */
-export function toXOF(eur: number): number {
-  return Math.round((eur * EUR_TO_XOF) / 100) * 100
+/** Return the price as-is (prices are stored in FCFA) */
+export function toXOF(fcfa: number): number {
+  return fcfa
 }
 
-/** Format an EUR price as a display FCFA string: "121 400 FCFA" */
-export function fmtXOF(eur: number): string {
-  return toXOF(eur).toLocaleString('fr-FR') + ' FCFA'
+/** Format a FCFA price with space thousands separator: "150 000 FCFA" */
+export function fmtXOF(fcfa: number): string {
+  return fcfa.toLocaleString('fr-FR') + ' FCFA'
 }

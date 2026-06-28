@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Plus, Minus, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import type { Product } from '@/data/products';
@@ -25,6 +25,8 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
   const [quantity, setQuantity] = useState(1);
 
   const description = product.description?.[language] ?? product.description?.fr;
+  const stock = product.stock;
+  const outOfStock = stock === 0;
 
   return (
     <div className="pt-28 md:pt-32 pb-24 bg-background transition-colors duration-300">
@@ -95,7 +97,24 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
               </Link>
             )}
 
-            <p className="text-3xl md:text-4xl font-bold text-primary mb-6">{fmtXOF(product.price)}</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary mb-3">{fmtXOF(product.price)}</p>
+
+            {stock !== undefined && stock <= 5 && (
+              <div className="mb-4">
+                {stock === 0 && (
+                  <p className="text-sm font-semibold text-muted-foreground">Épuisé</p>
+                )}
+                {stock === 1 && (
+                  <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    Dernière pièce disponible !
+                  </p>
+                )}
+                {stock >= 2 && stock <= 5 && (
+                  <p className="text-sm font-medium text-accent">Plus que quelques pièces</p>
+                )}
+              </div>
+            )}
 
             <div className="mb-6">
               <h2 className="text-base font-semibold mb-3 text-foreground">{t.product.description}</h2>
@@ -119,11 +138,12 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex items-center border border-border rounded-xl overflow-hidden bg-muted shrink-0">
+              <div className={`flex items-center border border-border rounded-xl overflow-hidden bg-muted shrink-0 ${outOfStock ? 'opacity-40 pointer-events-none' : ''}`}>
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
                   className="w-12 h-14 flex items-center justify-center text-foreground hover:bg-background transition-colors duration-200"
                   aria-label="Diminuer"
+                  disabled={outOfStock}
                 >
                   <Minus className="h-4 w-4" />
                 </button>
@@ -134,6 +154,7 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
                   onClick={() => setQuantity(q => q + 1)}
                   className="w-12 h-14 flex items-center justify-center text-foreground hover:bg-background transition-colors duration-200"
                   aria-label="Augmenter"
+                  disabled={outOfStock}
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -142,10 +163,11 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
               <Button
                 size="lg"
                 onClick={() => addToCart(product, quantity)}
-                className="flex-1 h-14 bg-primary text-primary-foreground hover:bg-primary/90 text-base border-none"
+                disabled={outOfStock}
+                className="flex-1 h-14 bg-primary text-primary-foreground hover:bg-primary/90 text-base border-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                {t.product.addToCart}
+                {outOfStock ? 'Indisponible' : t.product.addToCart}
               </Button>
             </div>
           </motion.div>

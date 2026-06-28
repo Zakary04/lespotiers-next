@@ -18,6 +18,7 @@ export interface Product {
   materials: string;
   techniques: string;
   isNew: boolean;
+  stock?: number;
   features?: string[];
   specifications?: Record<string, string>;
 }

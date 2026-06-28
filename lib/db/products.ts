@@ -18,6 +18,7 @@ interface DbProduct {
   materials: string | null
   techniques: string | null
   is_new: boolean
+  stock: number
   features: string[] | null
 }
 
@@ -45,6 +46,7 @@ function toProduct(row: DbProduct): Product {
     materials: row.materials ?? '',
     techniques: row.techniques ?? '',
     isNew: row.is_new,
+    stock: row.stock,
     features: row.features ?? undefined,
   }
 }

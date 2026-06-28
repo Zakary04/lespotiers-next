@@ -215,17 +215,23 @@ export default function ProductForm({ product }: Props) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold mb-1.5 text-foreground">Prix (€) *</label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.price}
-              onChange={set('price')}
-              placeholder="185.00"
-              required
-              className="bg-background border-border focus-visible:ring-primary"
-            />
+            <label className="block text-sm font-semibold mb-1.5 text-foreground">Prix (FCFA) *</label>
+            <div className="relative">
+              <Input
+                type="number"
+                min="0"
+                step="1"
+                value={form.price}
+                onChange={set('price')}
+                placeholder="150000"
+                required
+                className="bg-background border-border focus-visible:ring-primary pr-16"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none">
+                FCFA
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Entrez le prix en FCFA (ex: 150000)</p>
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1.5 text-foreground">Stock</label>
