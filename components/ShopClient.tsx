@@ -30,9 +30,13 @@ export default function ShopClient({ products, artisans, categories }: Props) {
     slug: c.slug,
     label: language === 'fr' ? c.label_fr : c.label_en,
   }));
+  const maxPrice = useMemo(
+    () => Math.max(500000, ...products.map(p => p.price)),
+    [products]
+  );
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedArtisan, setSelectedArtisan] = useState('all');
-  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [priceRange, setPriceRange] = useState([0, maxPrice]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -55,14 +59,14 @@ export default function ShopClient({ products, artisans, categories }: Props) {
   const resetFilters = () => {
     setSelectedCategory('all');
     setSelectedArtisan('all');
-    setPriceRange([0, 500]);
+    setPriceRange([0, maxPrice]);
     setSearchQuery('');
   };
 
   const activeFilterCount =
     (selectedCategory !== 'all' ? 1 : 0) +
     (selectedArtisan !== 'all' ? 1 : 0) +
-    (priceRange[0] !== 0 || priceRange[1] !== 500 ? 1 : 0) +
+    (priceRange[0] !== 0 || priceRange[1] !== maxPrice ? 1 : 0) +
     (searchQuery.trim() ? 1 : 0);
 
   const gridKey = `${selectedCategory}-${selectedArtisan}-${priceRange[0]}-${priceRange[1]}-${searchQuery}`;
@@ -128,7 +132,7 @@ export default function ShopClient({ products, artisans, categories }: Props) {
 
       <div>
         <h4 className="text-xs font-semibold mb-4 text-muted-foreground tracking-widest uppercase">{t.shop.priceRange}</h4>
-        <PriceRangeSlider min={0} max={500} value={priceRange} onChange={setPriceRange} />
+        <PriceRangeSlider min={0} max={maxPrice} value={priceRange} onChange={setPriceRange} />
       </div>
 
       {activeFilterCount > 0 && (
