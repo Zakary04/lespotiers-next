@@ -1,2 +1,9 @@
 node_modules/ 
 .next/ 
+# variables d'environnement
+.env
+.env.local
+.env*.local
+
+# build
+*.tsbuildinfo
