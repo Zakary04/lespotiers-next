@@ -18,6 +18,7 @@ interface DbProduct {
   materials: string | null
   techniques: string | null
   is_new: boolean
+  is_archived: boolean
   stock: number
   features: string[] | null
 }
@@ -56,6 +57,7 @@ export async function getProducts(): Promise<Product[]> {
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .eq('is_archived', false)
       .order('created_at', { ascending: true })
     if (error) throw error
     return (data ?? []).map(toProduct)
@@ -69,6 +71,7 @@ export async function getProductsBestsellers(limit = 6): Promise<Product[]> {
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .eq('is_archived', false)
       .order('created_at', { ascending: true })
       .limit(limit)
     if (error) throw error
@@ -84,6 +87,7 @@ export async function getNewProducts(): Promise<Product[]> {
       .from('products')
       .select('*')
       .eq('is_new', true)
+      .eq('is_archived', false)
     if (error) throw error
     return (data ?? []).map(toProduct)
   } catch {
@@ -97,6 +101,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
       .from('products')
       .select('*')
       .eq('slug', slug)
+      .eq('is_archived', false)
       .maybeSingle()
     if (bySlug) return toProduct(bySlug)
 
@@ -104,6 +109,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
       .from('products')
       .select('*')
       .eq('id', slug)
+      .eq('is_archived', false)
       .maybeSingle()
     return byId ? toProduct(byId) : null
   } catch {
@@ -117,6 +123,7 @@ export async function getProductsByArtisanId(artisanId: number): Promise<Product
       .from('products')
       .select('*')
       .eq('artisan_id', artisanId)
+      .eq('is_archived', false)
       .order('created_at', { ascending: true })
     if (error) throw error
     return (data ?? []).map(toProduct)
