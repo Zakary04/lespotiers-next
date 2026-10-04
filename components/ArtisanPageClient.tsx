@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
+import FormattedText from '@/components/FormattedText';
 import type { Artisan } from '@/data/artisans';
 import type { Product } from '@/data/products';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -45,7 +46,7 @@ export default function ArtisanPageClient({ artisan, products }: Props) {
             <p className="text-base text-muted-foreground mb-6">
               {artisan.experience || `${artisan.yearsExperience} ans d'expérience`}
             </p>
-            <p className="text-base leading-relaxed text-foreground">{artisan.shortBio || artisan.bio}</p>
+            <FormattedText text={artisan.shortBio || artisan.bio} className="text-base leading-relaxed text-foreground" />
           </div>
         </motion.div>
 
@@ -77,7 +78,7 @@ export default function ArtisanPageClient({ artisan, products }: Props) {
               <h2 className="text-2xl font-bold mb-6 text-foreground" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
                 {t.potiers.philosophy}
               </h2>
-              <p className="text-lg leading-relaxed text-foreground">{artisan.philosophy}</p>
+              <FormattedText text={artisan.philosophy} className="text-lg leading-relaxed text-foreground" />
             </div>
           )}
           {artisan.techniques && (
@@ -85,7 +86,7 @@ export default function ArtisanPageClient({ artisan, products }: Props) {
               <h2 className="text-2xl font-bold mb-6 text-foreground" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
                 {t.potiers.techniques}
               </h2>
-              <p className="text-lg leading-relaxed text-foreground">{artisan.techniques}</p>
+              <FormattedText text={artisan.techniques} className="text-lg leading-relaxed text-foreground" />
             </div>
           )}
         </div>

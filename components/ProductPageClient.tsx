@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
+import FormattedText from '@/components/FormattedText';
 import type { Product } from '@/data/products';
 import type { Artisan } from '@/data/artisans';
 import { useCart } from '@/contexts/CartContext';
@@ -116,8 +117,8 @@ export default function ProductPageClient({ product, artisan, relatedProducts }:
 
             <div className="mb-6">
               <h2 className="text-base font-semibold mb-3 text-foreground">{t.product.description}</h2>
-              <p className="text-base leading-relaxed text-foreground mb-3">{description?.poetic}</p>
-              <p className="text-sm leading-relaxed text-muted-foreground">{description?.technical}</p>
+              <FormattedText text={description?.poetic} className="text-base leading-relaxed text-foreground" containerClassName="space-y-4 mb-3" />
+              <FormattedText text={description?.technical} className="text-sm leading-relaxed text-muted-foreground" containerClassName="space-y-3" />
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 mb-6 p-4 bg-muted border border-border rounded-xl text-sm">
