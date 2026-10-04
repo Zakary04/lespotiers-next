@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { createClient } from '@/lib/supabase/client'
+import { safeRedirectPath } from '@/lib/utils/safe-redirect'
 
 function ConnexionForm() {
   const [email, setEmail] = useState('')
@@ -18,7 +19,7 @@ function ConnexionForm() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') ?? '/compte'
+  const redirectTo = safeRedirectPath(searchParams.get('redirectTo'), '/compte')
   const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
